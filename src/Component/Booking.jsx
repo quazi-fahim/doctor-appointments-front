@@ -7,6 +7,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 const Booking = () => {
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    let patientName = localStorage.getItem("userName");
+    if(!patientName){
+      navigate('/');
+    }
+  }, []);
   const { doctor, bookAppointment } = useAppointments();
  
   const { doctorId } = useParams();
@@ -16,7 +24,6 @@ const Booking = () => {
   const [selectDate, setSelectDate] = useState(new Date());
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedTime, setSelectedTime] = useState("");
-  const navigate = useNavigate();
 
  
   // Fetch available time slots for the selected date

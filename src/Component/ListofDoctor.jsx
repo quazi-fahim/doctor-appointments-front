@@ -2,13 +2,21 @@ import { Box, Button, Text } from "@chakra-ui/react";
 
 import { useNavigate } from "react-router-dom";
 import { useAppointments } from "../Appointmentcontext";
+import { useEffect } from "react";
 
 
 const ListofDoctor = () => {
- 
 
-    const { doctor, loading } = useAppointments();
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    let patientName = localStorage.getItem("userName");
+    if(!patientName){
+      navigate('/');
+    }
+  }, []);
+
+  const { doctor, loading } = useAppointments(); 
 
   if (loading) return <Text>Loading...</Text>;
 

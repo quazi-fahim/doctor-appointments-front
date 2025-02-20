@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
+  const navigate = useNavigate();
+  useEffect(()=>{
+    let patientName = localStorage.getItem("userName");
+    if(!patientName){
+      navigate('/');
+    }
+  }, []);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -19,7 +27,7 @@ const AppointmentList = () => {
     };
 
     fetchAppointments();
-  }, []);
+  }, [appointments]);
 
   const handleDelete = async (id) => {
     try {
