@@ -1,107 +1,78 @@
 import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-const AppointmentList = () => {
-  const [appointments, setAppointments] = useState([]);
+const AppointmentDetail = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [appointment, setAppointment] = useState(null);
+  const [formData, setFormData] = useState({ patientName: "", date: "", duration: "" });
 
   useEffect(() => {
-    let patientName = localStorage.getItem("userName");
-    if (!patientName) {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchAppointment = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/appointments`, {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, {
           headers: { "ngrok-skip-browser-warning": "69420" },
         });
-        setAppointments(response.data);
+        setAppointment(response.data);
+        setFormData(response.data);
       } catch (error) {
-        console.error("Error fetching appointments", error);
+        console.error("Error fetching appointment details", error);
       }
     };
 
-    fetchAppointments();
-  }, []);
+    fetchAppointment();
+  }, [id]);
 
-  const handleDelete = async (id) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, {
+      await axios.put(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, formData, {
         headers: { "ngrok-skip-browser-warning": "69420" },
       });
-
-      setAppointments((prevAppointments) => prevAppointments.filter((appt) => appt._id !== id));
-      alert("Appointment deleted successfully.");
+      alert("Appointment updated successfully.");
+      navigate("/appointment"); // Navigate back to appointment list
     } catch (error) {
-      console.error("Error deleting appointment", error);
+      console.error("Error updating appointment", error);
     }
   };
 
-  const convertMinutesToTime = (minutes) => {
-    if (typeof minutes !== "number" || minutes < 0) return "Not specified";
-  
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-  
-    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
-  };
-
-  const convertDateFormat = (dateString) => {
-    if (!dateString) return "Not specified";
-
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB"); // Formats as DD/MM/YYYY
-  };
+  if (!appointment) return <p>Loading...</p>;
 
   return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
-      <h2>Appointments</h2>
-      {appointments.length === 0 ? (
-        <p>No appointments found</p>
-      ) : (
-        appointments.map((appt) => (
-          <div
-            key={appt._id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "10px",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate(`/appointments/${appt._id}`)}
-          >
-            <p>
-              <strong>Patient:</strong> {appt.patientName || "Unknown"} <br />
-              <strong>Date:</strong> {convertDateFormat(appt.date)} <br />
-              <strong>Time:</strong> {convertMinutesToTime(appt.duration) || "Not specified"}
-            </p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(appt._id);
-              }}
-              style={{
-                marginLeft: "50px",
-                background: "red",
-                color: "#fff",
+    <div style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
+      <h2 >Appointment Details</h2>
+      <label>
+        Patient Name:
+        <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} />
+      </label>
+      <br />
+      <label>
+        Date:
+        <input type="date" name="date" value={formData.date} onChange={handleChange} />
+      </label>
+      <br />
+      <label>
+        Time:
+        <input type="text" name="duration" value={formData.duration} onChange={handleChange} />
+      </label>
+      <br />
+      <button onClick={handleUpdate}  style={{
+                background: "black",
+                color: "white",
                 padding: "5px 10px",
                 border: "none",
                 borderRadius: "5px",
                 cursor: "pointer",
-              }}
-            >
-              Cancel Appointment
-            </button>
-          </div>
-        ))
-      )}
+              }}>
+        Update
+      </button>
+     
     </div>
   );
 };
 
-export default AppointmentList;
+export default AppointmentDetail;
