@@ -70,6 +70,7 @@ const AppointmentList = () => {
                 handleDelete(appt._id);
               }}
               style={{
+                marginLeft:"50px",
                 background: "red",
                 color: "#fff",
                 padding: "5px 10px",
@@ -78,7 +79,7 @@ const AppointmentList = () => {
                 cursor: "pointer",
               }}
             >
-              Delete Appointment
+              Cancel Appointment
             </button>
           </div>
         ))

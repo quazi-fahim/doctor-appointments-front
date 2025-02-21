@@ -43,27 +43,79 @@ const AppointmentDetail = () => {
   if (!appointment) return <p>Loading...</p>;
 
   return (
-    <div style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
-      <h2>Appointment Details</h2>
-      <label>
+    <div
+      style={{
+        maxWidth: "500px",
+        margin: "auto",
+        padding: "20px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        borderRadius: "8px",
+        background: "#fff",
+      }}
+    >
+      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Appointment Details</h2>
+      <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
         Patient Name:
-        <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} />
       </label>
-      <br />
-      <label>
-        Date:
-        <input type="date" name="date" value={formData.date} onChange={handleChange} />
-      </label>
-      <br />
-      <label>
-        Time:
-        <input type="text" name="duration" value={formData.duration} onChange={handleChange} />
-      </label>
-      <br />
-      <button onClick={handleUpdate} style={{ marginRight: "10px" }}>
+      <input
+        type="text"
+        name="patientName"
+        value={formData.patientName}
+        onChange={handleChange}
+        style={{
+          width: "100%",
+          padding: "8px",
+          marginBottom: "16px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      />
+
+      <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Date:</label>
+      <input
+        type="date"
+        name="date"
+        value={formData.date}
+        onChange={handleChange}
+        style={{
+          width: "100%",
+          padding: "8px",
+          marginBottom: "16px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      />
+
+      <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Time:</label>
+      <input
+        type="text"
+        name="duration"
+        value={formData.duration}
+        onChange={handleChange}
+        style={{
+          width: "100%",
+          padding: "8px",
+          marginBottom: "20px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      />
+
+      <button
+        onClick={handleUpdate}
+        style={{
+          background: "black",
+          color: "white",
+          padding: "10px 15px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          width: "100%",
+          fontSize: "16px",
+        }}
+      >
         Update
       </button>
-      <button onClick={() => navigate("/")}>Cancel</button>
     </div>
   );
 };
