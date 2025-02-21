@@ -26,7 +26,7 @@ const AppointmentList = () => {
     };
 
     fetchAppointments();
-  }, []);
+  }, [appointments]);
 
   const handleDelete = async (id) => {
     try {
@@ -49,7 +49,13 @@ const AppointmentList = () => {
     return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
   };
   
-
+  const convertDateFormat = (dateString) => {
+    if (!dateString) return "Not specified";
+  
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB"); // Formats as DD/MM/YYYY
+  };
+  
   return (
     <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
       <h2>Appointments</h2>
@@ -70,7 +76,8 @@ const AppointmentList = () => {
           >
             <p>
               <strong>Patient:</strong> {appt.patientName || "Unknown"} <br />
-              <strong>Date:</strong> {appt.date} <br />
+              <strong>Date:</strong> {convertDateFormat(appt.date)} <br />
+              <br />
               <strong>Time:</strong> {convertMinutesToTime(appt.duration) || "Not specified"}
 
             </p>

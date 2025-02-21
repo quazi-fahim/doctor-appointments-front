@@ -7,6 +7,7 @@ const AppointmentDetail = () => {
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
   const [formData, setFormData] = useState({ patientName: "", date: "", duration: "" });
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -15,7 +16,11 @@ const AppointmentDetail = () => {
           headers: { "ngrok-skip-browser-warning": "69420" },
         });
         setAppointment(response.data);
-        setFormData(response.data);
+        setFormData({
+          ...response.data,
+          duration: formatTime(response.data.duration), // Convert time format
+        });
+        fetchSlots(response.data.date); // Fetch slots for the selected date
       } catch (error) {
         console.error("Error fetching appointment details", error);
       }
@@ -24,8 +29,33 @@ const AppointmentDetail = () => {
     fetchAppointment();
   }, [id]);
 
+  // Fetch available slots for a selected date
+  const fetchSlots = async (selectedDate) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/doctors/${appointment?.doctorId}/slots?date=${selectedDate}`,
+        { headers: { "ngrok-skip-browser-warning": "69420" } }
+      );
+      setAvailableSlots(response.data || []);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+    }
+  };
+
+  // Format time to hh:mm
+  const formatTime = (timeString) => {
+    if (!timeString) return "";
+    const [hours, minutes] = timeString.split(":");
+    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === "date") {
+      fetchSlots(value);
+    }
   };
 
   const handleUpdate = async () => {
@@ -54,6 +84,7 @@ const AppointmentDetail = () => {
       }}
     >
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Appointment Details</h2>
+
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
         Patient Name:
       </label>
@@ -76,6 +107,8 @@ const AppointmentDetail = () => {
         type="date"
         name="date"
         value={formData.date}
+        min={new Date().toISOString().split("T")[0]} // Disable past dates
+        max={new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split("T")[0]} // Allow next 7 days
         onChange={handleChange}
         style={{
           width: "100%",
@@ -87,8 +120,7 @@ const AppointmentDetail = () => {
       />
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Time:</label>
-      <input
-        type="text"
+      <select
         name="duration"
         value={formData.duration}
         onChange={handleChange}
@@ -99,7 +131,18 @@ const AppointmentDetail = () => {
           border: "1px solid #ccc",
           borderRadius: "4px",
         }}
-      />
+      >
+        <option value="">Select available time slot</option>
+        {availableSlots.length > 0 ? (
+          availableSlots.map((slot, index) => (
+            <option key={index} value={slot}>
+              {formatTime(slot)}
+            </option>
+          ))
+        ) : (
+          <option disabled>No slots available</option>
+        )}
+      </select>
 
       <button
         onClick={handleUpdate}
