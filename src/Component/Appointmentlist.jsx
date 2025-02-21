@@ -58,7 +58,7 @@ const AppointmentList = () => {
   
   return (
     <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
-      <h2>Appointments</h2>
+      <h2 style={{ fontWeight: "bold" }}>Appointments</h2>
       {appointments.length === 0 ? (
         <p>No appointments found</p>
       ) : (
@@ -76,8 +76,7 @@ const AppointmentList = () => {
           >
             <p>
               <strong>Patient:</strong> {appt.patientName || "Unknown"} <br />
-              <strong>Date:</strong> {convertDateFormat(appt.date)} <br />
-              <br />
+              <strong>Date:</strong> {convertDateFormat(appt.date)}<br />
               <strong>Time:</strong> {convertMinutesToTime(appt.duration) || "Not specified"}
 
             </p>

@@ -15,12 +15,17 @@ const AppointmentDetail = () => {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, {
           headers: { "ngrok-skip-browser-warning": "69420" },
         });
-        setAppointment(response.data);
+
+        const appointmentData = response.data;
+        setAppointment(appointmentData);
+
         setFormData({
-          ...response.data,
-          duration: formatTime(response.data.duration), // Convert time format
+          patientName: appointmentData.patientName,
+          date: formatDate(appointmentData.date), // Format date to dd:mm:yy
+          duration: appointmentData.duration, // Keep the previously booked time
         });
-        fetchSlots(response.data.date); // Fetch slots for the selected date
+
+        fetchSlots(appointmentData.date);
       } catch (error) {
         console.error("Error fetching appointment details", error);
       }
@@ -29,7 +34,7 @@ const AppointmentDetail = () => {
     fetchAppointment();
   }, [id]);
 
-  // Fetch available slots for a selected date
+  // Fetch available slots for the selected date
   const fetchSlots = async (selectedDate) => {
     try {
       const response = await axios.get(
@@ -42,13 +47,14 @@ const AppointmentDetail = () => {
     }
   };
 
-  // Format time to hh:mm
-  const formatTime = (timeString) => {
-    if (!timeString) return "";
-    const [hours, minutes] = timeString.split(":");
-    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  // Format date to dd:mm:yy
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}:${month}:${year.slice(-2)}`;
   };
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -104,11 +110,9 @@ const AppointmentDetail = () => {
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Date:</label>
       <input
-        type="date"
+        type="text"
         name="date"
         value={formData.date}
-        min={new Date().toISOString().split("T")[0]} // Disable past dates
-        max={new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split("T")[0]} // Allow next 7 days
         onChange={handleChange}
         style={{
           width: "100%",
@@ -117,6 +121,7 @@ const AppointmentDetail = () => {
           border: "1px solid #ccc",
           borderRadius: "4px",
         }}
+        readOnly // Prevent manual editing
       />
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Time:</label>
@@ -136,7 +141,7 @@ const AppointmentDetail = () => {
         {availableSlots.length > 0 ? (
           availableSlots.map((slot, index) => (
             <option key={index} value={slot}>
-              {formatTime(slot)}
+              {slot}
             </option>
           ))
         ) : (
