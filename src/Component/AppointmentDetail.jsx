@@ -7,7 +7,6 @@ const AppointmentDetail = () => {
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
   const [formData, setFormData] = useState({ patientName: "", date: "", duration: "" });
-  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -15,17 +14,8 @@ const AppointmentDetail = () => {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, {
           headers: { "ngrok-skip-browser-warning": "69420" },
         });
-
-        const data = response.data;
-
-        setAppointment(data);
-        setFormData({
-          patientName: data.patientName,
-          date: formatDate(data.date),
-          duration: formatTime(data.duration), // Fixing the time format issue
-        });
-
-        fetchSlots(data.date);
+        setAppointment(response.data);
+        setFormData(response.data);
       } catch (error) {
         console.error("Error fetching appointment details", error);
       }
@@ -34,45 +24,8 @@ const AppointmentDetail = () => {
     fetchAppointment();
   }, [id]);
 
-  const fetchSlots = async (selectedDate) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/doctors/${appointment?.doctorId}/slots?date=${selectedDate}`,
-        { headers: { "ngrok-skip-browser-warning": "69420" } }
-      );
-      setAvailableSlots(response.data || []);
-    } catch (error) {
-      console.error("Error fetching available slots:", error);
-    }
-  };
-
-  // ✅ Fixing Date Format: Convert ISO date (yyyy-mm-dd) → dd:mm:yy
-  const formatDate = (isoDate) => {
-    if (!isoDate) return "";
-    const dateObj = new Date(isoDate);
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-    const year = String(dateObj.getFullYear()).slice(-2); // Extract last 2 digits of year
-    return `${day}:${month}:${year}`;
-  };
-
-  // ✅ Fixing Time Format: Convert `T18:30:00.000Z` → `18:30`
-  const formatTime = (isoTime) => {
-    if (!isoTime) return "";
-    const timeMatch = isoTime.match(/T(\d{2}):(\d{2})/);
-    if (timeMatch) {
-      return `${timeMatch[1]}:${timeMatch[2]}`; // Extracts hh:mm
-    }
-    return isoTime; // Fallback in case of incorrect format
-  };
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === "date") {
-      fetchSlots(value);
-    }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleUpdate = async () => {
@@ -81,7 +34,7 @@ const AppointmentDetail = () => {
         headers: { "ngrok-skip-browser-warning": "69420" },
       });
       alert("Appointment updated successfully.");
-      navigate("/");
+      navigate("/"); // Navigate back to appointment list
     } catch (error) {
       console.error("Error updating appointment", error);
     }
@@ -101,7 +54,6 @@ const AppointmentDetail = () => {
       }}
     >
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Appointment Details</h2>
-
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
         Patient Name:
       </label>
@@ -121,7 +73,7 @@ const AppointmentDetail = () => {
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Date:</label>
       <input
-        type="text" // Changed from "date" to "text" to allow formatted date
+        type="date"
         name="date"
         value={formData.date}
         onChange={handleChange}
@@ -135,7 +87,8 @@ const AppointmentDetail = () => {
       />
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Time:</label>
-      <select
+      <input
+        type="text"
         name="duration"
         value={formData.duration}
         onChange={handleChange}
@@ -146,18 +99,7 @@ const AppointmentDetail = () => {
           border: "1px solid #ccc",
           borderRadius: "4px",
         }}
-      >
-        <option value={formData.duration}>{formData.duration} (Previously Booked)</option>
-        {availableSlots.length > 0 ? (
-          availableSlots.map((slot, index) => (
-            <option key={index} value={slot}>
-              {formatTime(slot)}
-            </option>
-          ))
-        ) : (
-          <option disabled>No slots available</option>
-        )}
-      </select>
+      />
 
       <button
         onClick={handleUpdate}
