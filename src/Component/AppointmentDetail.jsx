@@ -7,7 +7,9 @@ const AppointmentDetail = () => {
   const navigate = useNavigate();
   const [appointment, setAppointment] = useState(null);
   const [formData, setFormData] = useState({ patientName: "", date: "", duration: "" });
+  const [availableSlots, setAvailableSlots] = useState([]);
 
+  // Fetch Appointment Details
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
@@ -16,6 +18,7 @@ const AppointmentDetail = () => {
         });
         setAppointment(response.data);
         setFormData(response.data);
+        fetchAvailableSlots(response.data.date);
       } catch (error) {
         console.error("Error fetching appointment details", error);
       }
@@ -24,17 +27,48 @@ const AppointmentDetail = () => {
     fetchAppointment();
   }, [id]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Fetch Available Time Slots
+  const fetchAvailableSlots = async (date) => {
+    try {
+      const formattedDate = new Date(date).toISOString().split("T")[0]; // Ensure proper format
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/doctors/${appointment?.doctorId}/slots?date=${formattedDate}`,
+        {
+          headers: { "ngrok-skip-browser-warning": "69420" },
+        }
+      );
+
+      // Format time slots to HH:mm format
+      const formattedSlots = response.data.map(slot => {
+        const [hours, minutes] = slot.split(":");
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+      });
+
+      setAvailableSlots(formattedSlots || []);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+    }
   };
 
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // If the date changes, fetch new time slots
+    if (name === "date") {
+      fetchAvailableSlots(value);
+    }
+  };
+
+  // Handle Appointment Update
   const handleUpdate = async () => {
     try {
       await axios.put(`${import.meta.env.VITE_BASE_URL}/appointments/${id}`, formData, {
         headers: { "ngrok-skip-browser-warning": "69420" },
       });
       alert("Appointment updated successfully.");
-      navigate("/"); // Navigate back to appointment list
+      navigate("/");
     } catch (error) {
       console.error("Error updating appointment", error);
     }
@@ -54,6 +88,8 @@ const AppointmentDetail = () => {
       }}
     >
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Appointment Details</h2>
+
+      {/* Patient Name */}
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
         Patient Name:
       </label>
@@ -71,6 +107,7 @@ const AppointmentDetail = () => {
         }}
       />
 
+      {/* Date Input */}
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Date:</label>
       <input
         type="date"
@@ -86,9 +123,9 @@ const AppointmentDetail = () => {
         }}
       />
 
+      {/* Time Slot Selection */}
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Time:</label>
-      <input
-        type="text"
+      <select
         name="duration"
         value={formData.duration}
         onChange={handleChange}
@@ -99,8 +136,20 @@ const AppointmentDetail = () => {
           border: "1px solid #ccc",
           borderRadius: "4px",
         }}
-      />
+      >
+        <option value="">Select available time slot</option>
+        {availableSlots.length > 0 ? (
+          availableSlots.map((slot, index) => (
+            <option key={index} value={slot}>
+              {slot}
+            </option>
+          ))
+        ) : (
+          <option disabled>No slots available</option>
+        )}
+      </select>
 
+      {/* Update Button */}
       <button
         onClick={handleUpdate}
         style={{
