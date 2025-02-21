@@ -22,7 +22,7 @@ const AppointmentDetail = () => {
         setFormData({
           patientName: data.patientName,
           date: formatDate(data.date),
-          duration: formatTime(data.duration), // Set previous time
+          duration: formatTime(data.duration), // Fixing the time format issue
         });
 
         fetchSlots(data.date);
@@ -46,7 +46,7 @@ const AppointmentDetail = () => {
     }
   };
 
-  // Format ISO date (yyyy-mm-dd) to dd:mm:yy
+  // ✅ Fixing Date Format: Convert ISO date (yyyy-mm-dd) → dd:mm:yy
   const formatDate = (isoDate) => {
     if (!isoDate) return "";
     const dateObj = new Date(isoDate);
@@ -56,11 +56,14 @@ const AppointmentDetail = () => {
     return `${day}:${month}:${year}`;
   };
 
-  // Format ISO time (hh:mm:ss) to hh:mm
-  const formatTime = (timeString) => {
-    if (!timeString) return "";
-    const [hours, minutes] = timeString.split(":");
-    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  // ✅ Fixing Time Format: Convert `T18:30:00.000Z` → `18:30`
+  const formatTime = (isoTime) => {
+    if (!isoTime) return "";
+    const timeMatch = isoTime.match(/T(\d{2}):(\d{2})/);
+    if (timeMatch) {
+      return `${timeMatch[1]}:${timeMatch[2]}`; // Extracts hh:mm
+    }
+    return isoTime; // Fallback in case of incorrect format
   };
 
   const handleChange = (e) => {
@@ -118,7 +121,7 @@ const AppointmentDetail = () => {
 
       <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Date:</label>
       <input
-        type="text" // Changed from "date" to "text" to display formatted date
+        type="text" // Changed from "date" to "text" to allow formatted date
         name="date"
         value={formData.date}
         onChange={handleChange}
