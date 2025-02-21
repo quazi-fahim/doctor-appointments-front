@@ -11,7 +11,7 @@ const AppointmentList = () => {
     if (!patientName) {
       navigate("/");
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -26,7 +26,7 @@ const AppointmentList = () => {
     };
 
     fetchAppointments();
-  }, [appointments]);
+  }, []);
 
   const handleDelete = async (id) => {
     try {
@@ -42,11 +42,11 @@ const AppointmentList = () => {
   };
 
   const convertMinutesToTime = (minutes) => {
-    if (!minutes && minutes !== 0) return "Not specified";
-
+    if (typeof minutes !== "number" || minutes < 0) return "Not specified";
+  
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-
+  
     return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
   };
 
