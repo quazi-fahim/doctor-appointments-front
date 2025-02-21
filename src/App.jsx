@@ -13,14 +13,30 @@ import AppointmentDetail from "./Component/AppointmentDetail";
 const App = () => {
     return (
         <Box>
-        <Flex justify="space-between" mb={4}>
-        <Heading>Doctor Appointment System</Heading>
-        <Flex gap={3}>
-          <Button as={Link} to="/">Home</Button>
-          <Button as={Link} to="/listofdoctor">Doctors</Button>
-          <Button as={Link} to="/appointments">Appointments</Button>
-        </Flex>
+           <Flex
+      as="nav"
+      bg="blue.600"
+      color="white"
+      px={6}
+      py={3}
+      justify="space-between"
+      align="center"
+      boxShadow="md"
+    >
+      <Heading size="md">Doctor Appointment System</Heading>
+
+      <Flex gap={4}>
+        <Button as={Link} to="/" colorScheme="teal" variant="ghost">
+          Home
+        </Button>
+        <Button as={Link} to="/listofdoctor" colorScheme="teal" variant="ghost">
+          Doctors
+        </Button>
+        <Button as={Link} to="/appointments" colorScheme="teal" variant="ghost">
+          Appointments
+        </Button>
       </Flex>
+    </Flex>
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/listofdoctor" element={<ListofDoctor />} />

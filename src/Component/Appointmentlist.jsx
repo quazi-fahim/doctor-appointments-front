@@ -40,6 +40,15 @@ const AppointmentList = () => {
       console.error("Error deleting appointment", error);
     }
   };
+  const convertMinutesToTime = (minutes) => {
+    if (!minutes && minutes !== 0) return "Not specified";
+    
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+  };
+  
 
   return (
     <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
@@ -62,7 +71,8 @@ const AppointmentList = () => {
             <p>
               <strong>Patient:</strong> {appt.patientName || "Unknown"} <br />
               <strong>Date:</strong> {appt.date} <br />
-              <strong>Time:</strong> {appt.duration || "Not specified"}
+              <strong>Time:</strong> {convertMinutesToTime(appt.duration) || "Not specified"}
+
             </p>
             <button
               onClick={(e) => {
