@@ -5,6 +5,7 @@ import ListofDoctor from "./Component/ListofDoctor";
 import Booking from "./Component/Booking";
 import Appointmentlist from "./Component/Appointmentlist";
 import { Box, Button, Flex, Heading } from "@chakra-ui/react";
+import AppointmentDetail from "./Component/AppointmentDetail";
 
 
 
@@ -26,6 +27,7 @@ const App = () => {
                 <Route path="/book/:doctorId" element={<Booking />} />
 
                 <Route path="/appointments" element={<Appointmentlist/>} />
+                <Route path="/appointments/:id" element={<AppointmentDetail />} />
             </Routes>
             </Box> 
     );
